@@ -20,14 +20,24 @@ controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
 scene.onOverlapTile(SpriteKind.runner, assets.tile`myTile30`, function (sprite, location) {
     tiles.setTileAt(location, assets.tile`myTile28`)
     sprite.vy = -300
-    timer.after(500, function () {
+    timer.after(200, function () {
         tiles.setTileAt(location, assets.tile`myTile30`)
     })
 })
 function level (lvl: number) {
     destroy()
+    music.stopAllSounds()
     if (lvl == 0) {
         tiles.setCurrentTilemap(tilemap`runner chaser`)
+        name = "WORLD 1: PORCUPINE FOREST"
+        namepart2 = " LEVEL 1: RUNNER, CHASER"
+        timer.after(600, function () {
+            music.play(music.createSong(hex`0078000408020200001c00010a006400f401640000040000000000000000000000000005000004900004000600010f06000800010f08000a00010c0a000c00010c0c000e00010f0e001000010f10001200010c12001400010c14001600010f16001800010f18002000010c20002200010c22002400010c24002600010f26002800010f28002a00010c2a002c00010c2c002e00010f2e003000010f30003200010c32003400010c34003600010f36003800010f38004000010c06001c00010a006400f401640000040000000000000000000000000000000002b6000a000c00012c0c000e00012a0e001000012a10001200012a12001400012a14001600012916001800012718001a00012c1a001c0001221c001e00011d1e002000011920002800011b28002a0001202a002c0001242c002e0001242e003000012430003200022a2c32003400012734003600022729360038000327292a38003a000427292a2c3a003c00052527292a2c3c003e0006242527292a2c3e0040001706080a0c0d0f1112141618191b1d1e2022242527292a2c`), music.PlaybackMode.LoopingInBackground)
+        })
+    } else if (lvl == 1) {
+    	
+    } else {
+    	
     }
     mySprite = sprites.create(img`
         ................................
@@ -656,18 +666,27 @@ function level (lvl: number) {
 }
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (selectinglvl) {
-        selectinglvl = false
-        color.startFade(color.originalPalette, color.Black, 300)
-        color.pauseUntilFadeDone()
-        color.startFadeFromCurrent(color.White, 300)
-        if (selectingworld) {
-            selectingworld = false
-            world(selectedlvl)
+        if (blockSettings.readNumber("curlvl") < selectedlvl) {
+            game.splash("YOU CANNOT ACCESS THIS LEVEL YET")
+            selectinglvl = true
         } else {
-            level(selectedlvl)
+            selectinglvl = false
+            color.startFade(color.originalPalette, color.Black, 300)
+            color.pauseUntilFadeDone()
+            color.startFadeFromCurrent(color.White, 300)
+            if (selectingworld) {
+                selectingworld = false
+                world(selectedlvl)
+                color.pauseUntilFadeDone()
+                color.startFadeFromCurrent(color.originalPalette, 300)
+            } else {
+                level(selectedlvl)
+                color.pauseUntilFadeDone()
+                color.startFadeFromCurrent(color.originalPalette, 300)
+                color.pauseUntilFadeDone()
+                game.splash(name, namepart2)
+            }
         }
-        color.pauseUntilFadeDone()
-        color.startFadeFromCurrent(color.originalPalette, 300)
     } else {
         controller.moveSprite(mySprite, 0, 0)
         shield = sprites.create(img`
@@ -711,7 +730,9 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     }
 })
 scene.onOverlapTile(SpriteKind.Player, assets.tile`myTile33`, function (sprite, location) {
-    currentlvl += 1
+    if (selectedlvl == currentlvl) {
+        currentlvl += 1
+    }
     world(selectedlvl)
 })
 controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
@@ -782,6 +803,7 @@ function destroy () {
 }
 function world (wrld: number) {
     sprites.destroyAllSpritesOfKind(SpriteKind.Player)
+    music.stopAllSounds()
     tileset = [assets.tile`myTile2`, assets.tile`myTile12`, assets.tile`myTile18`]
     tiles.setCurrentTilemap(tilemap`level1`)
     selectinglvl = true
@@ -810,12 +832,14 @@ scene.onOverlapTile(SpriteKind.Player, assets.tile`myTile30`, function (sprite, 
     tiles.setTileAt(location, assets.tile`myTile28`)
     canjump = false
     mySprite.vy = -300
-    timer.after(500, function () {
+    timer.after(200, function () {
         tiles.setTileAt(location, assets.tile`myTile30`)
     })
 })
 let shield: Sprite = null
 let spikeball: Sprite = null
+let namepart2 = ""
+let name = ""
 let mySprite: Sprite = null
 let cancanjump = false
 let canjump = false
@@ -828,6 +852,8 @@ let tileset: Image[] = []
 if (!(blockSettings.exists("curlvl"))) {
     blockSettings.writeNumber("curlvl", 0)
     tileset = [assets.tile`myTile14`, assets.tile`myTile21`]
+    music.stopAllSounds()
+    music.play(music.createSong(hex`0078000408020106001c00010a006400f4016400000400000000000000000000000000000000022a000000040001240c00100001241000140001221c00200001242400280001242c0030000124300034000122`), music.PlaybackMode.LoopingInBackground)
     tiles.setCurrentTilemap(tilemap`level2`)
     selectingworld = true
     selectinglvl = true
